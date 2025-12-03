@@ -210,7 +210,7 @@ PC-12:
 
 ```bash
 IPv4 Address: 172.16.200.1
-Subnet Mask : 255.255.255.0
+Subnet Mask : 255.255.0.0
 Default GW : 172.16.255.254
 ```
 
