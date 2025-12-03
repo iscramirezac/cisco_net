@@ -11,6 +11,7 @@
 ## Descripción del escenario
 
 - Diagrama
+- 
   ![Diagrama Practica 1](./Prac1.png)
 - Lista de Dispositivos
   - Switches
@@ -32,8 +33,6 @@
 Cambiar el nombre de Hostname de los Switches:
 
 - Switch1 -> SW-A-01
-- Switch2 -> SW-A-02
-- Switch3 -> SW-A-03
 
 ### Cambiar Hostname
 

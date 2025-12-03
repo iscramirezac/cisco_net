@@ -1,10 +1,11 @@
-# Práctica 2
+# Práctica 3
 
 ## Objetivo de la práctica
 
 - Configuración de Switch
 - Configuración de Router
   - Configuración de interfaces de red
+  - Configuración de DHCP
 - Verificación de conectividad entre hosts
 
 ## Materiales necesarios
@@ -15,7 +16,7 @@
 
 - Diagrama
   
-  ![Diagrama Practica 2](./Prac2.png)
+  ![Diagrama Práctica 3](./Prac3.png)
 - Lista de Dispositivos
   - Router
     - 4331
@@ -306,4 +307,49 @@ Ping statistics for 192.168.100.254:
 Approximate round trip times in milli-seconds:
     Minimum = 0ms, Maximum = 0ms, Average = 0ms
 
+```
+
+## Procedimiento de Router RT-A-01
+
+Excluir IPs
+```bash
+RT-A-01#configure terminal 
+RT-A-01(dhcp-config)#ip dhcp excluded-address 192.168.100.1 192.168.100.50
+```
+Configurar DHCP en el Router:
+```bash
+RT-A-01(config)#ip dhcp pool LAN
+RT-A-01(dhcp-config)#network 192.168.100.0 255.255.255.0
+RT-A-01(dhcp-config)#default-router 192.168.100.254
+RT-A-01(dhcp-config)#dns-server 192.168.100.254
+RT-A-01(dhcp-config)#exit
+```
+## Configuración de PC
+
+Cambiar la configuración estática de la PC a DHCP:
+
+### PC-10
+
+```bash
+FastEthernet0 Connection:(default port)
+
+   Connection-specific DNS Suffix..: 
+   Link-local IPv6 Address.........: FE80::2E0:F9FF:FEDD:4D42
+   IPv6 Address....................: ::
+   IPv4 Address....................: 192.168.100.51
+   Subnet Mask.....................: 255.255.255.0
+   Default Gateway.................: ::
+                                     192.168.100.254
+```
+### PC-11
+```bash
+FastEthernet0 Connection:(default port)
+
+   Connection-specific DNS Suffix..: 
+   Link-local IPv6 Address.........: FE80::201:64FF:FE1E:930D
+   IPv6 Address....................: ::
+   IPv4 Address....................: 192.168.100.52
+   Subnet Mask.....................: 255.255.255.0
+   Default Gateway.................: ::
+                                     192.168.100.254
 ```
