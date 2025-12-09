@@ -12,7 +12,7 @@
 ## Descripción del escenario
 
 - Diagrama
-  ![Diagrama Practica 5](./Prac5.png)
+  ![Diagrama Practica 6](./Prac6.png)
 - Lista de Dispositivos
   - Routers
     - RT-A-01 (4331)
