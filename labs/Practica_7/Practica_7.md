@@ -18,6 +18,7 @@
 
   ![Diagrama Practica 7](./Prac7.png)
 - Lista de Dispositivos
+  - Cable Módem
   - Router
     - 4331 (1)
   - Switches
@@ -25,7 +26,7 @@
   - End Devices
     - PC (4)
 - Direccionamiento IP
-  - Utiliza el direccionamiento incluido en el .pkt. Si construyes el escenario desde cero, puedes usar 192.168.10.0/24 con gateway 192.168.10.254 y 2 PCs en la misma red.
+  - Utiliza el direccionamiento incluido en el .pkt.
 
 ## Requerimientos técnicos
 
@@ -530,6 +531,13 @@ RT-A-01(config)#no ip domain-lookup
 ```
 ### Configuración de Interfaces
 ```bash
+RT-A-01(config)#interface GigabitEthernet0/0/0
+RT-A-01(config-if)#ip address 203.0.113.2 255.255.255.0
+RT-A-01(config-if)#ip address 203.0.113.2 255.255.255.252
+RT-A-01(config-if)#no shutdown
+```
+
+```bash
 RT-A-01(config)#interface GigabitEthernet0/0/1
 RT-A-01(config-if)#ip address 192.168.100.254 255.255.255.0
 RT-A-01(config-if)#no shutdown
@@ -550,7 +558,7 @@ RT-A-01(config-subif)#exit
 ```bash
 RT-A-01#show ip interface brief 
 Interface              IP-Address      OK? Method Status                Protocol 
-GigabitEthernet0/0/0   unassigned      YES unset  administratively down down 
+GigabitEthernet0/0/0   203.0.113.2     YES manual up                    up 
 GigabitEthernet0/0/1   192.168.100.254 YES manual up                    up 
 GigabitEthernet0/0/1.2 unassigned      YES unset  up                    up 
 GigabitEthernet0/0/1.10172.16.10.254   YES manual up                    up 
@@ -624,6 +632,95 @@ FastEthernet0 Connection:(default port)
    Default Gateway.................: ::
                                      172.16.20.254
 ```
+
+## Ruta estática default
+
+```bash
+RT-A-01(config)#ip route 0.0.0.0 0.0.0.0 203.0.113.1
+```
+
+```bash
+RT-A-01(config)#do show ip route
+```
+
+```bash
+Gateway of last resort is 203.0.113.1 to network 0.0.0.0
+
+     172.16.0.0/16 is variably subnetted, 4 subnets, 2 masks
+C       172.16.10.0/24 is directly connected, GigabitEthernet0/0/1.10
+L       172.16.10.254/32 is directly connected, GigabitEthernet0/0/1.10
+C       172.16.20.0/24 is directly connected, GigabitEthernet0/0/1.20
+L       172.16.20.254/32 is directly connected, GigabitEthernet0/0/1.20
+     192.168.100.0/24 is variably subnetted, 2 subnets, 2 masks
+C       192.168.100.0/24 is directly connected, GigabitEthernet0/0/1
+L       192.168.100.254/32 is directly connected, GigabitEthernet0/0/1
+     203.0.113.0/24 is variably subnetted, 2 subnets, 2 masks
+C       203.0.113.0/30 is directly connected, GigabitEthernet0/0/0
+L       203.0.113.2/32 is directly connected, GigabitEthernet0/0/0
+S*   0.0.0.0/0 [1/0] via 203.0.113.1
+```
+Verificar:
+```bash
+RT-A-01#ping 203.0.113.2
+
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 203.0.113.2, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 2/8/13 ms
+```
+
+## Configuración de PAT
+```bash
+RT-A-01#configure terminal 
+RT-A-01(config)#interface gigabitEthernet 0/0/1
+RT-A-01(config-if)#ip nat inside
+RT-A-01(config-if)#exit
+
+RT-A-01(config)#interface gigabitEthernet 0/0/1.10
+RT-A-01(config-subif)#ip nat inside
+RT-A-01(config-subif)#exit
+
+RT-A-01(config)#interface gigabitEthernet 0/0/1.20
+RT-A-01(config-subif)#ip nat inside
+RT-A-01(config-subif)#exit
+
+RT-A-01(config)#interface gigabitEthernet 0/0/0
+RT-A-01(config-if)#ip nat outside 
+RT-A-01(config-if)#exit
+```
+```bash
+RT-A-01(config)#access-list 1 permit 192.168.100.0 0.0.0.255
+RT-A-01(config)#access-list 1 permit 172.16.10.0 0.0.0.255
+RT-A-01(config)#access-list 1 permit 172.16.20.0 0.0.0.255
+```
+```bash
+RT-A-01(config)#ip nat inside source list 1 interface gigabitEthernet 0/0/0 overload 
+```
+Validación. 
+
+VLAN 10
+```bash
+ping 203.0.113.2
+
+Pinging 203.0.113.2 with 32 bytes of data:
+
+Reply from 203.0.113.2: bytes=32 time<1ms TTL=255
+Reply from 203.0.113.2: bytes=32 time<1ms TTL=255
+Reply from 203.0.113.2: bytes=32 time<1ms TTL=255
+Reply from 203.0.113.2: bytes=32 time<1ms TTL=255
+```
+VLAN 20
+```bash
+ping 203.0.113.2
+
+Pinging 203.0.113.2 with 32 bytes of data:
+
+Reply from 203.0.113.2: bytes=32 time<1ms TTL=255
+Reply from 203.0.113.2: bytes=32 time<1ms TTL=255
+Reply from 203.0.113.2: bytes=32 time<1ms TTL=255
+Reply from 203.0.113.2: bytes=32 time<1ms TTL=255
+```
+
 
 ## Tabla de referencia rápida
 
